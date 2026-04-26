@@ -1,0 +1,15 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Data and Datasets
+data/
+
+# Python Bytecode
+__pycache__/
+*.py[cod]
+
+# IDE Settings (Optional but recommended)
+.vscode/
+.idea/

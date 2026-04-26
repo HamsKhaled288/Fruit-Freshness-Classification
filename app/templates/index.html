@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Fruit Freshness Detector — upload a fruit image to classify it as Fresh or Rotten using deep learning." />
+  <title>Fruit Freshness Detector</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <div class="card">
+    <h1>🍎 Fruit Freshness Detector</h1>
+    <p class="subtitle">Upload a fruit image to classify it as <strong>Fresh</strong> or <strong>Rotten</strong>.</p>
+
+    <!-- Upload form -->
+    <form id="upload-form" enctype="multipart/form-data">
+      <label class="file-label" for="image-input">
+        <span id="file-label-text">Choose an image…</span>
+        <input type="file" id="image-input" name="image" accept="image/*" required />
+      </label>
+
+      <!-- Image preview -->
+      <div id="preview-container" class="hidden">
+        <img id="preview-img" src="#" alt="Image preview" />
+      </div>
+
+      <button type="submit" id="submit-btn">Analyse</button>
+    </form>
+
+    <!-- Result area -->
+    <div id="result-box" class="hidden">
+      <div id="result-label"></div>
+      <div id="result-confidence"></div>
+      <div id="result-bar-container">
+        <div id="result-bar"></div>
+      </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div id="loading" class="hidden">
+      <div class="spinner"></div>
+      <p>Analysing…</p>
+    </div>
+
+    <!-- Error message -->
+    <div id="error-box" class="hidden">
+      <p id="error-text"></p>
+    </div>
+  </div>
+
+  <script>
+    const form         = document.getElementById('upload-form');
+    const fileInput    = document.getElementById('image-input');
+    const fileLabelTxt = document.getElementById('file-label-text');
+    const previewCont  = document.getElementById('preview-container');
+    const previewImg   = document.getElementById('preview-img');
+    const submitBtn    = document.getElementById('submit-btn');
+    const resultBox    = document.getElementById('result-box');
+    const resultLabel  = document.getElementById('result-label');
+    const resultConf   = document.getElementById('result-confidence');
+    const resultBar    = document.getElementById('result-bar');
+    const loading      = document.getElementById('loading');
+    const errorBox     = document.getElementById('error-box');
+    const errorText    = document.getElementById('error-text');
+
+    // Show preview when a file is chosen
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      fileLabelTxt.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        previewCont.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+      // Reset previous results
+      resultBox.classList.add('hidden');
+      errorBox.classList.add('hidden');
+    });
+
+    // Submit via fetch — no page reload
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      // Show spinner, hide results
+      loading.classList.remove('hidden');
+      resultBox.classList.add('hidden');
+      errorBox.classList.add('hidden');
+      submitBtn.disabled = true;
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Server error');
+        }
+
+        // Display result
+        const isFresh     = data.label === 'Fresh';
+        const emoji       = isFresh ? '✅' : '❌';
+        const colorClass  = isFresh ? 'fresh' : 'rotten';
+
+        resultLabel.textContent       = `${emoji} ${data.label}`;
+        resultLabel.className         = colorClass;
+        resultConf.textContent        = `Confidence: ${data.confidence.toFixed(1)}%`;
+        resultBar.style.width         = `${data.confidence}%`;
+        resultBar.className           = colorClass;
+
+        resultBox.classList.remove('hidden');
+      } catch (err) {
+        errorText.textContent = `Error: ${err.message}`;
+        errorBox.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>
