@@ -13,3 +13,7 @@ __pycache__/
 # IDE Settings (Optional but recommended)
 .vscode/
 .idea/
+
+
+# Models
+models/scratch_model.h5
