@@ -3,17 +3,13 @@
 venv/
 ENV/
 
-# Data and Datasets
 data/
 
-# Python Bytecode
 __pycache__/
 *.py[cod]
 
-# IDE Settings (Optional but recommended)
 .vscode/
 .idea/
 
-
 # Models
-models/scratch_model.h5
+models/CNN_model.h5

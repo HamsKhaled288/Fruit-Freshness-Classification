@@ -107,12 +107,12 @@ def main():
     ratio = total_fresh / total_all * 100 if total_all else 0
     if abs(ratio - 50) > 10:
         print(
-            f"\n  ⚠ WARNING: Dataset is imbalanced! "
+            f"\nWARNING: Dataset is imbalanced! "
             f"({ratio:.1f}% fresh / {100-ratio:.1f}% rotten). "
             f"Consider class_weight or oversampling."
         )
     else:
-        print(f"\n  ✔ Class balance looks acceptable ({ratio:.1f}% fresh).")
+        print(f"\nClass balance looks acceptable ({ratio:.1f}% fresh).")
 
     print("\n  Per-split breakdown:")
     header = f"  {'Class':<8}" + "".join(f"  {s:<8}" for s in SPLITS)
@@ -124,7 +124,7 @@ def main():
         )
         print(row)
 
-    print("\n  ✔ Splitting complete!\n")
+    print("\nSplitting complete!\n")
 
 
 if __name__ == "__main__":

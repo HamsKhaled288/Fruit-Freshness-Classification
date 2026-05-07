@@ -5,7 +5,7 @@ A complete end-to-end Computer Vision project for binary image classification: *
 ## Project Description
 
 This project trains two deep learning models to classify fruit images as either fresh or rotten:
-1. **CNN from Scratch** — A custom 4-block convolutional network
+1. **CNN** — A custom 4-block convolutional network
 2. **Transfer Learning** — MobileNetV2 with feature extraction + fine-tuning
 
 Both models are evaluated and compared. A Flask web app allows live predictions via image upload.
@@ -24,11 +24,11 @@ project/
 │       └── test/fresh  | rotten
 ├── notebooks/
 │   ├── 01_preprocessing.ipynb
-│   ├── 02_model_scratch.ipynb
+│   ├── 02_model_cnn.ipynb
 │   ├── 03_model_transfer.ipynb
 │   └── 04_evaluation.ipynb
 ├── models/
-│   ├── scratch_model.h5
+│   ├── CNN_model.h5
 │   └── transfer_model.h5
 ├── results/
 │   └── plots/             ← all saved figures
@@ -74,7 +74,7 @@ Run notebooks **in order** from the `notebooks/` folder:
 | # | Notebook | Purpose |
 |---|----------|---------|
 | 1 | `01_preprocessing.ipynb` | Corrupt image check, class balance, data generators, augmentation |
-| 2 | `02_model_scratch.ipynb` | Train CNN from scratch, save model, plot curves |
+| 2 | `02_model_cnn.ipynb` | Train CNN, save model, plot curves |
 | 3 | `03_model_transfer.ipynb` | MobileNetV2 feature extraction + fine-tuning |
 | 4 | `04_evaluation.ipynb` | Load both models, metric comparison, confusion matrices, ROC curves |
 
@@ -104,9 +104,9 @@ After training you will find in `results/plots/`:
 
 - `class_balance.png` — dataset class distribution
 - `augmented_samples.png` — sample augmented images
-- `scratch_accuracy.png` / `scratch_loss.png`
+- `CNN_accuracy.png` / `CNN_loss.png`
 - `transfer_accuracy.png` / `transfer_loss.png`
-- `scratch_confusion.png` / `transfer_confusion.png`
-- `scratch_roc.png` / `transfer_roc.png`
+- `CNN_confusion.png` / `transfer_confusion.png`
+- `CNN_roc.png` / `transfer_roc.png`
 
 And `results/comparison_table.csv` — a side-by-side comparison of both models.
