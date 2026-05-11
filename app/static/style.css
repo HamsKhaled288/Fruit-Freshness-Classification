@@ -94,39 +94,57 @@ button[type="submit"]:disabled {
 /* ── Result Box ───────────────────────────────────── */
 #result-box {
   margin-top: 24px;
-  padding: 22px 18px;
+  padding: 24px 18px;
   border-radius: 12px;
   background: #f9faff;
   border: 1px solid #e3e8f5;
+  max-width: 650px;
+  width: 120%; /* Expand slightly outside the card if needed */
+  margin-left: -10%;
 }
-#result-label {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-#result-label.fresh  { color: #2e7d32; }
-#result-label.rotten { color: #c62828; }
 
-#result-confidence {
-  font-size: 0.95rem;
-  color: #555;
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.result-column h3 {
+  font-size: 0.9rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin-bottom: 12px;
 }
 
+.model-label {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.model-label.fresh  { color: #2e7d32; }
+.model-label.rotten { color: #c62828; }
+
+.model-conf {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
 /* ── Confidence Bar ───────────────────────────────── */
-#result-bar-container {
+.model-bar-container {
   background: #e8ecf5;
   border-radius: 20px;
-  height: 12px;
+  height: 8px;
   overflow: hidden;
 }
-#result-bar {
+.model-bar {
   height: 100%;
   border-radius: 20px;
   transition: width 0.5s ease;
 }
-#result-bar.fresh  { background: #4caf50; }
-#result-bar.rotten { background: #f44336; }
+.model-bar.fresh  { background: #4caf50; }
+.model-bar.rotten { background: #f44336; }
 
 /* ── Loading Spinner ──────────────────────────────── */
 #loading {

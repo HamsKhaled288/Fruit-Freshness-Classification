@@ -12,4 +12,4 @@ __pycache__/
 .idea/
 
 # Models
-models/CNN_model.h5
+models/

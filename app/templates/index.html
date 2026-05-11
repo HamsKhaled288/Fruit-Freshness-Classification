@@ -30,17 +30,33 @@
 
     <!-- Result area -->
     <div id="result-box" class="hidden">
-      <div id="result-label"></div>
-      <div id="result-confidence"></div>
-      <div id="result-bar-container">
-        <div id="result-bar"></div>
+      <div class="results-grid">
+        <!-- CNN Model Column -->
+        <div class="result-column">
+          <h3>CNN</h3>
+          <div id="cnn-label" class="model-label"></div>
+          <div id="cnn-confidence" class="model-conf"></div>
+          <div class="model-bar-container">
+            <div id="cnn-bar" class="model-bar"></div>
+          </div>
+        </div>
+
+        <!-- Transfer Model Column -->
+        <div class="result-column">
+          <h3>Transfer Learning</h3>
+          <div id="transfer-label" class="model-label"></div>
+          <div id="transfer-confidence" class="model-conf"></div>
+          <div class="model-bar-container">
+            <div id="transfer-bar" class="model-bar"></div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Loading spinner -->
     <div id="loading" class="hidden">
       <div class="spinner"></div>
-      <p>Analysing…</p>
+      <p>Analysing with both models…</p>
     </div>
 
     <!-- Error message -->
@@ -57,12 +73,18 @@
     const previewImg   = document.getElementById('preview-img');
     const submitBtn    = document.getElementById('submit-btn');
     const resultBox    = document.getElementById('result-box');
-    const resultLabel  = document.getElementById('result-label');
-    const resultConf   = document.getElementById('result-confidence');
-    const resultBar    = document.getElementById('result-bar');
     const loading      = document.getElementById('loading');
     const errorBox     = document.getElementById('error-box');
     const errorText    = document.getElementById('error-text');
+
+    // Model elements
+    const cLabel = document.getElementById('cnn-label');
+    const cConf  = document.getElementById('cnn-confidence');
+    const cBar   = document.getElementById('cnn-bar');
+
+    const tLabel = document.getElementById('transfer-label');
+    const tConf  = document.getElementById('transfer-confidence');
+    const tBar   = document.getElementById('transfer-bar');
 
     // Show preview when a file is chosen
     fileInput.addEventListener('change', () => {
@@ -103,21 +125,31 @@
         });
 
         const data = await response.json();
+        console.log("Prediction result:", data);
 
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Server error');
         }
 
-        // Display result
-        const isFresh     = data.label === 'Fresh';
-        const emoji       = isFresh ? '✅' : '❌';
-        const colorClass  = isFresh ? 'fresh' : 'rotten';
+        // Helper to update a model column
+        const updateModel = (modelData, labelEl, confEl, barEl) => {
+          if (!modelData || !labelEl) return;
+          const isFresh = modelData.label === 'Fresh';
+          const emoji   = isFresh ? '✅' : '❌';
+          const color   = isFresh ? 'fresh' : 'rotten';
 
-        resultLabel.textContent       = `${emoji} ${data.label}`;
-        resultLabel.className         = colorClass;
-        resultConf.textContent        = `Confidence: ${data.confidence.toFixed(1)}%`;
-        resultBar.style.width         = `${data.confidence}%`;
-        resultBar.className           = colorClass;
+          labelEl.textContent = `${emoji} ${modelData.label}`;
+          labelEl.className   = `model-label ${color}`;
+          confEl.textContent  = `Confidence: ${modelData.confidence.toFixed(1)}%`;
+          barEl.style.width   = `${modelData.confidence}%`;
+          barEl.className     = `model-bar ${color}`;
+        };
+
+        // Update both columns
+        // We check for both 'CNN' (new) and 'scratch' (fallback) just in case
+        const cnnData = data.CNN || data.scratch;
+        updateModel(cnnData, cLabel, cConf, cBar);
+        updateModel(data.transfer, tLabel, tConf, tBar);
 
         resultBox.classList.remove('hidden');
       } catch (err) {

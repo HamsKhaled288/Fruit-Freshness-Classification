@@ -17,9 +17,10 @@ from tensorflow.keras.models import load_model
 from PIL import Image
 
 # ── Configuration ──────────────────────────────────────────────────────
-ROOT       = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(ROOT, "models", "transfer_model.h5")
-IMG_SIZE   = (224, 224)
+ROOT          = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CNN_PATH  = os.path.join(ROOT, "models", "CNN_model.h5")
+TRANSFER_PATH = os.path.join(ROOT, "models", "transfer_model.h5")
+IMG_SIZE      = (224, 224)
 
 # Class index → label mapping.
 # Keras flow_from_directory sorts classes alphabetically:
@@ -31,10 +32,14 @@ app = Flask(__name__,
             template_folder="templates",
             static_folder="static")
 
-# Load model once at startup
-print(f"  Loading model from: {MODEL_PATH}")
-model = load_model(MODEL_PATH)
-print("  ✔ Model loaded successfully.")
+# Load models once at startup
+print(f"Loading CNN model from: {CNN_PATH}")
+cnn_model = load_model(CNN_PATH)
+print("CNN model loaded successfully.")
+
+print(f"Loading transfer model from: {TRANSFER_PATH}")
+transfer_model = load_model(TRANSFER_PATH)
+print("Transfer model loaded successfully.")
 
 
 def preprocess_image(file_bytes: bytes) -> np.ndarray:
@@ -56,7 +61,7 @@ def index():
 def predict():
     """
     Accept a multipart/form-data POST with field 'image'.
-    Returns JSON: {"label": "Fresh"|"Rotten", "confidence": float}
+    Returns JSON with predictions from both models.
     """
     if "image" not in request.files:
         return jsonify({"error": "No image file provided. Use field name 'image'."}), 400
@@ -71,16 +76,26 @@ def predict():
     except Exception as e:
         return jsonify({"error": f"Could not read or process the image: {str(e)}"}), 400
 
-    # Run inference
-    prob = float(model.predict(img_array, verbose=0)[0][0])
+    # Run inference — CNN Model
+    prob_c = float(cnn_model.predict(img_array, verbose=0)[0][0])
+    idx_c  = 1 if prob_c >= 0.5 else 0
+    res_c  = {
+        "label": CLASS_NAMES[idx_c],
+        "confidence": round((prob_c if idx_c == 1 else 1.0 - prob_c) * 100, 2)
+    }
 
-    # prob ≥ 0.5 → rotten (class index 1), else fresh (class index 0)
-    pred_index  = 1 if prob >= 0.5 else 0
-    label       = CLASS_NAMES[pred_index]
-    confidence  = prob if pred_index == 1 else (1.0 - prob)
-    confidence  = round(confidence * 100, 2)   # as percentage
+    # Run inference — Transfer Model
+    prob_t = float(transfer_model.predict(img_array, verbose=0)[0][0])
+    idx_t  = 1 if prob_t >= 0.5 else 0
+    res_t  = {
+        "label": CLASS_NAMES[idx_t],
+        "confidence": round((prob_t if idx_t == 1 else 1.0 - prob_t) * 100, 2)
+    }
 
-    return jsonify({"label": label, "confidence": confidence})
+    return jsonify({
+        "CNN": res_c,
+        "transfer": res_t
+    })
 
 
 if __name__ == "__main__":
